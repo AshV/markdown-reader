@@ -4,7 +4,8 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
-import { BookOpen, FileEdit, FileUp, Download, Sparkles, Sun, Moon, ClipboardPaste } from 'lucide-react';
+import LZString from 'lz-string';
+import { BookOpen, FileEdit, FileUp, Download, Sparkles, Sun, Moon, ClipboardPaste, Share } from 'lucide-react';
 import './App.css';
 
 const DEFAULT_MARKDOWN = `# Welcome to Markdown Reader ✨
@@ -18,12 +19,26 @@ A clean and simple way to read your Markdown documents.
 3. **Edit directly**: Switch to **Edit** mode using the toggle in the top right to type or edit your Markdown.
 4. **Change theme**: Click the **Sun/Moon** icon in the top left to switch between light and dark modes.
 5. **Save your work**: Click the **Save** button to download your current document.
+6. **Share via Link**: Click the **Share** button to copy a link containing your text.
 
 Enjoy your distraction-free reading experience!
 `;
 
+const getInitialMarkdown = () => {
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    try {
+      const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+      if (decompressed) return decompressed;
+    } catch (e) {
+      console.error("Failed to parse markdown from URL", e);
+    }
+  }
+  return DEFAULT_MARKDOWN;
+};
+
 function App() {
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
+  const [markdown, setMarkdown] = useState<string>(getInitialMarkdown);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
     return localStorage.getItem('theme') === 'light';
@@ -104,6 +119,14 @@ function App() {
     }
   };
 
+  const handleShare = () => {
+    const compressed = LZString.compressToEncodedURIComponent(markdown);
+    const url = `${window.location.origin}${window.location.pathname}#${compressed}`;
+    navigator.clipboard.writeText(url)
+      .then(() => alert('Shareable link copied to clipboard!'))
+      .catch(() => alert('Failed to copy link. Please manually copy from the URL bar if possible.'));
+  };
+
   return (
     <div className="app-container">
       <header className="toolbar glass-panel">
@@ -143,6 +166,11 @@ function App() {
           <button className="btn" onClick={handleDownload} title="Save File">
             <Download size={18} />
             <span>Save</span>
+          </button>
+          
+          <button className="btn" onClick={handleShare} title="Share via Link">
+            <Share size={18} />
+            <span>Share</span>
           </button>
 
           <div style={{ width: '1px', height: '24px', background: 'var(--panel-border)', margin: '0 8px' }}></div>
