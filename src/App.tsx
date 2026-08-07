@@ -109,7 +109,7 @@ function App() {
       <header className="toolbar glass-panel">
         <div className="toolbar-left">
           <div className="logo" style={{ marginRight: '1rem' }}>
-            <img src="/icon.png" alt="MD Reader Logo" width="24" height="24" style={{ borderRadius: '4px' }} />
+            <img src={`${import.meta.env.BASE_URL}icon.png`} alt="MD Reader Logo" width="24" height="24" style={{ borderRadius: '4px' }} />
             <span>MD Reader</span>
           </div>
         </div>

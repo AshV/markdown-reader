@@ -1,7 +1,7 @@
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   padding: 1rem;
   gap: 1rem;
   max-width: 1200px;
@@ -9,6 +9,9 @@
 }
 
 .toolbar {
+  position: sticky;
+  top: 1rem;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -75,14 +78,12 @@
   flex: 1;
   display: flex;
   gap: 1rem;
-  min-height: 0; /* Important for flex child scrolling */
 }
 
 .pane {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
 .editor {
@@ -94,8 +95,9 @@
   font-size: 1rem;
   line-height: 1.6;
   padding: 1.5rem;
-  resize: none;
+  resize: vertical;
   outline: none;
+  min-height: calc(100vh - 6rem);
 }
 
 .editor::placeholder {
@@ -105,7 +107,6 @@
 .preview-container {
   flex: 1;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 
 /* Markdown Styles */
