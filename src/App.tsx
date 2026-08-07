@@ -7,20 +7,36 @@ import rehypeHighlight from 'rehype-highlight';
 import { BookOpen, FileEdit, FileUp, Download, Sun, Moon, ClipboardPaste } from 'lucide-react';
 import './App.css';
 
-const DEFAULT_MARKDOWN = `# Welcome to Markdown Reader ✨
+const DEFAULT_MARKDOWN = `# You just need to  press Ctrl+V now 📋
 
-A clean and simple way to read your Markdown documents.
+_to Enjoy your distraction-free reading experience!_
 
-## How to use this app
+### Optionally you can use the buttons in the top-right corner to
 
-1. **Open a file**: Click the **Open** button in the top right to select a local \`.md\` or \`.txt\` file from your computer.
-2. **Paste from clipboard**: Have Markdown copied? Click the **Paste** button to instantly view it here.
-3. **Edit directly**: Switch to **Edit** mode using the toggle in the top right to type or edit your Markdown.
-4. **Change theme**: Click the **Sun/Moon** icon in the top left to switch between light and dark modes.
-5. **Save your work**: Click the **Save** button to download your current document.
+>**Open a file**: 
 
-Enjoy your distraction-free reading experience!
-`;
+Click the **Open** button in the top right to select a local \`.md\` or \`.txt\` file from your computer.
+
+>Or **Paste from clipboard** 📋
+
+If haven't pressed Ctrl+V already. Click the **Paste** button to instantly view it here.
+
+>You can **Edit directly** here ✍️
+
+By switching to **Edit** mode using the toggle in the top right of this page.
+
+>Maybe **Be a Batman** 🦇
+
+By Clicking on **Moon** 🌙 in top right corner.
+
+>Or prove that **You're not Drakula** 🧛
+
+By Clicking on **Sun** 🌞 at exactly same place.
+
+>Irrespective of that **Save your world(work)** 💾 eventually.
+
+
+Built with ❤️ by [AshV](https://www.ashishvishwakarma.com/)`;
 
 function App() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
@@ -47,7 +63,7 @@ function App() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
-      
+
       const text = e.clipboardData?.getData('text');
       if (text) {
         setMarkdown(text);
@@ -72,7 +88,7 @@ function App() {
       }
     };
     reader.readAsText(file);
-    
+
     // Reset input so the same file can be loaded again if needed
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -113,11 +129,11 @@ function App() {
             <span>MD Reader</span>
           </div>
         </div>
-        
+
         <div className="toolbar-right">
-          <input 
-            type="file" 
-            accept=".md,.txt,text/markdown,text/plain" 
+          <input
+            type="file"
+            accept=".md,.txt,text/markdown,text/plain"
             ref={fileInputRef}
             onChange={handleFileUpload}
             className="file-input"
@@ -126,12 +142,12 @@ function App() {
             <FileUp size={18} />
             <span>Open</span>
           </button>
-          
+
           <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard">
             <ClipboardPaste size={18} />
             <span>Paste</span>
           </button>
-          
+
           <button className="btn" onClick={handleDownload} title="Save File">
             <Download size={18} />
             <span>Save</span>
@@ -139,8 +155,8 @@ function App() {
 
           <div style={{ width: '1px', height: '24px', background: 'var(--panel-border)', margin: '0 8px' }}></div>
 
-          <button 
-            className="btn active" 
+          <button
+            className="btn active"
             onClick={() => setIsEditing(!isEditing)}
             title={isEditing ? "Switch to Read Mode" : "Switch to Edit Mode"}
           >
@@ -156,9 +172,9 @@ function App() {
               </>
             )}
           </button>
-          
-          <button 
-            className="btn" 
+
+          <button
+            className="btn"
             onClick={() => setIsLightMode(!isLightMode)}
             title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
             style={{ padding: '0.5rem', borderRadius: '50%' }}
