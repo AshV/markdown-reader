@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
-import { BookOpen, FileEdit, FileUp, Download, Sparkles } from 'lucide-react';
+import { BookOpen, FileEdit, FileUp, Download, Sparkles, Sun, Moon, ClipboardPaste } from 'lucide-react';
 import './App.css';
 
 const DEFAULT_MARKDOWN = `# Welcome to Markdown Reader ✨
@@ -45,7 +45,20 @@ Or inline: $a^2 + b^2 = c^2$
 function App() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+    return localStorage.getItem('theme') === 'light';
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isLightMode) {
+      document.body.classList.add('light-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.body.classList.remove('light-theme');
+      localStorage.setItem('theme', 'dark');
+    }
+  }, [isLightMode]);
 
   // Handle global paste to update markdown
   useEffect(() => {
@@ -98,14 +111,35 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handlePasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setMarkdown(text);
+        setIsEditing(false); // Switch to reader mode on paste
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+      alert('Could not paste from clipboard. Please ensure you have granted clipboard permissions.');
+    }
+  };
+
   return (
     <div className="app-container">
       <header className="toolbar glass-panel">
         <div className="toolbar-left">
-          <div className="logo">
+          <div className="logo" style={{ marginRight: '1rem' }}>
             <Sparkles size={24} color="var(--accent-color)" />
             <span>MD Reader</span>
           </div>
+          <button 
+            className="btn" 
+            onClick={() => setIsLightMode(!isLightMode)}
+            title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            style={{ padding: '0.5rem', borderRadius: '50%' }}
+          >
+            {isLightMode ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
         </div>
         
         <div className="toolbar-right">
@@ -119,6 +153,11 @@ function App() {
           <button className="btn" onClick={() => fileInputRef.current?.click()} title="Open File">
             <FileUp size={18} />
             <span>Open</span>
+          </button>
+          
+          <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard">
+            <ClipboardPaste size={18} />
+            <span>Paste</span>
           </button>
           
           <button className="btn" onClick={handleDownload} title="Save File">
