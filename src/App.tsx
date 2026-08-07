@@ -4,8 +4,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
-import LZString from 'lz-string';
-import { BookOpen, FileEdit, FileUp, Download, Sparkles, Sun, Moon, ClipboardPaste, Share } from 'lucide-react';
+import { BookOpen, FileEdit, FileUp, Download, Sun, Moon, ClipboardPaste } from 'lucide-react';
 import './App.css';
 
 const DEFAULT_MARKDOWN = `# Welcome to Markdown Reader ✨
@@ -19,29 +18,15 @@ A clean and simple way to read your Markdown documents.
 3. **Edit directly**: Switch to **Edit** mode using the toggle in the top right to type or edit your Markdown.
 4. **Change theme**: Click the **Sun/Moon** icon in the top left to switch between light and dark modes.
 5. **Save your work**: Click the **Save** button to download your current document.
-6. **Share via Link**: Click the **Share** button to copy a link containing your text.
 
 Enjoy your distraction-free reading experience!
 `;
 
-const getInitialMarkdown = () => {
-  const hash = window.location.hash.slice(1);
-  if (hash) {
-    try {
-      const decompressed = LZString.decompressFromEncodedURIComponent(hash);
-      if (decompressed) return decompressed;
-    } catch (e) {
-      console.error("Failed to parse markdown from URL", e);
-    }
-  }
-  return DEFAULT_MARKDOWN;
-};
-
 function App() {
-  const [markdown, setMarkdown] = useState<string>(getInitialMarkdown);
+  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'light';
+    return localStorage.getItem('theme') !== 'dark';
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,58 +104,14 @@ function App() {
     }
   };
 
-  const handleShare = () => {
-    const compressed = LZString.compressToEncodedURIComponent(markdown);
-    const url = `${window.location.origin}${window.location.pathname}#${compressed}`;
-    
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(url)
-        .then(() => alert('Shareable link copied to clipboard!'))
-        .catch(() => fallbackCopyTextToClipboard(url));
-    } else {
-      fallbackCopyTextToClipboard(url);
-    }
-  };
-
-  const fallbackCopyTextToClipboard = (text: string) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    textArea.style.top = "0";
-    textArea.style.left = "0";
-    textArea.style.position = "fixed";
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    try {
-      const successful = document.execCommand('copy');
-      if (successful) {
-        alert('Shareable link copied to clipboard!');
-      } else {
-        alert('Failed to copy link. Please manually copy from the URL bar if possible.');
-      }
-    } catch (err) {
-      alert('Failed to copy link. Please manually copy from the URL bar if possible.');
-    }
-    document.body.removeChild(textArea);
-  };
-
   return (
     <div className="app-container">
       <header className="toolbar glass-panel">
         <div className="toolbar-left">
           <div className="logo" style={{ marginRight: '1rem' }}>
-            <Sparkles size={24} color="var(--accent-color)" />
+            <img src="/icon.png" alt="MD Reader Logo" width="24" height="24" style={{ borderRadius: '4px' }} />
             <span>MD Reader</span>
           </div>
-          <button 
-            className="btn" 
-            onClick={() => setIsLightMode(!isLightMode)}
-            title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            style={{ padding: '0.5rem', borderRadius: '50%' }}
-          >
-            {isLightMode ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
         </div>
         
         <div className="toolbar-right">
@@ -195,27 +136,34 @@ function App() {
             <Download size={18} />
             <span>Save</span>
           </button>
-          
-          <button className="btn" onClick={handleShare} title="Share via Link">
-            <Share size={18} />
-            <span>Share</span>
-          </button>
 
           <div style={{ width: '1px', height: '24px', background: 'var(--panel-border)', margin: '0 8px' }}></div>
 
           <button 
-            className={`btn ${!isEditing ? 'active' : ''}`} 
-            onClick={() => setIsEditing(false)}
+            className="btn active" 
+            onClick={() => setIsEditing(!isEditing)}
+            title={isEditing ? "Switch to Read Mode" : "Switch to Edit Mode"}
           >
-            <BookOpen size={18} />
-            <span>Read</span>
+            {isEditing ? (
+              <>
+                <BookOpen size={18} />
+                <span>Read</span>
+              </>
+            ) : (
+              <>
+                <FileEdit size={18} />
+                <span>Edit</span>
+              </>
+            )}
           </button>
+          
           <button 
-            className={`btn ${isEditing ? 'active' : ''}`} 
-            onClick={() => setIsEditing(true)}
+            className="btn" 
+            onClick={() => setIsLightMode(!isLightMode)}
+            title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            style={{ padding: '0.5rem', borderRadius: '50%' }}
           >
-            <FileEdit size={18} />
-            <span>Edit</span>
+            {isLightMode ? <Moon size={18} /> : <Sun size={18} />}
           </button>
         </div>
       </header>
