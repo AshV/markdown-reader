@@ -209,3 +209,22 @@
   border: none;
   margin: 2em 0;
 }
+
+@media (max-width: 768px) {
+  .btn span {
+    display: none;
+  }
+  .toolbar {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  .toolbar-left, .toolbar-right {
+    gap: 0.25rem;
+  }
+  .btn {
+    padding: 0.5rem;
+  }
+  .logo span {
+    display: none;
+  }
+}

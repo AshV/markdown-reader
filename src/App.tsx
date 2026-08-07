@@ -122,9 +122,37 @@ function App() {
   const handleShare = () => {
     const compressed = LZString.compressToEncodedURIComponent(markdown);
     const url = `${window.location.origin}${window.location.pathname}#${compressed}`;
-    navigator.clipboard.writeText(url)
-      .then(() => alert('Shareable link copied to clipboard!'))
-      .catch(() => alert('Failed to copy link. Please manually copy from the URL bar if possible.'));
+    
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url)
+        .then(() => alert('Shareable link copied to clipboard!'))
+        .catch(() => fallbackCopyTextToClipboard(url));
+    } else {
+      fallbackCopyTextToClipboard(url);
+    }
+  };
+
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        alert('Shareable link copied to clipboard!');
+      } else {
+        alert('Failed to copy link. Please manually copy from the URL bar if possible.');
+      }
+    } catch (err) {
+      alert('Failed to copy link. Please manually copy from the URL bar if possible.');
+    }
+    document.body.removeChild(textArea);
   };
 
   return (
