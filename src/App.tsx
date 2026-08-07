@@ -35,7 +35,6 @@ By Clicking on **Sun** 🌞 at exactly same place.
 
 >Irrespective of that **Save your world(work)** 💾 eventually.
 
-
 Built with ❤️ by [AshV](https://www.ashishvishwakarma.com/)`;
 
 function App() {
