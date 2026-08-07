@@ -9,37 +9,17 @@ import './App.css';
 
 const DEFAULT_MARKDOWN = `# Welcome to Markdown Reader ✨
 
-A stunning, highly-responsive Markdown reader web application.
+A clean and simple way to read your Markdown documents.
 
-## Features Supported
+## How to use this app
 
-- **GitHub Flavored Markdown** via \`remark-gfm\`
-- **Code Syntax Highlighting** via \`rehype-highlight\`
-- **Math Equations** via \`remark-math\` & \`rehype-katex\`
+1. **Open a file**: Click the **Open** button in the top right to select a local \`.md\` or \`.txt\` file from your computer.
+2. **Paste from clipboard**: Have Markdown copied? Click the **Paste** button to instantly view it here.
+3. **Edit directly**: Switch to **Edit** mode using the toggle in the top right to type or edit your Markdown.
+4. **Change theme**: Click the **Sun/Moon** icon in the top left to switch between light and dark modes.
+5. **Save your work**: Click the **Save** button to download your current document.
 
-### Code Example
-
-\`\`\`javascript
-function calculateAwesomeness(user) {
-  return user.wantsAwesomeUI ? Infinity : 100;
-}
-\`\`\`
-
-### Math Example
-
-The beautiful equation:
-$$ E = mc^2 $$
-
-Or inline: $a^2 + b^2 = c^2$
-
-### Tables
-
-| Feature | Status |
-|---------|--------|
-| Reader  | Awesome|
-| Editor  | Sleek  |
-
-> "The best way to read markdown is with a beautiful UI." - Markdown Reader
+Enjoy your distraction-free reading experience!
 `;
 
 function App() {
