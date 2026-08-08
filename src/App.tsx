@@ -195,7 +195,7 @@ function App() {
             />
           </div>
         )}
-        <div className="pane glass-panel preview-container">
+        <div className={`pane glass-panel preview-container ${isEditing ? 'hide-on-mobile' : ''}`}>
           <div className="markdown-body">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}
