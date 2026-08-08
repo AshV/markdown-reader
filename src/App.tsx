@@ -7,7 +7,7 @@ import rehypeHighlight from 'rehype-highlight';
 import { BookOpen, FileEdit, FileUp, Download, Sun, Moon, ClipboardPaste } from 'lucide-react';
 import './App.css';
 
-const DEFAULT_MARKDOWN = `# You just need to  press Ctrl+V now 📋
+const DEFAULT_MARKDOWN = `# Hit Ctrl+V now 📋
 
 _to Enjoy your distraction-free reading experience!_
 
@@ -184,7 +184,7 @@ function App() {
       </header>
 
       <main className="content-area">
-        {isEditing ? (
+        {isEditing && (
           <div className="pane glass-panel">
             <textarea
               className="editor"
@@ -194,18 +194,17 @@ function App() {
               autoFocus
             />
           </div>
-        ) : (
-          <div className="pane glass-panel preview-container">
-            <div className="markdown-body">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex, rehypeHighlight]}
-              >
-                {markdown}
-              </ReactMarkdown>
-            </div>
-          </div>
         )}
+        <div className="pane glass-panel preview-container">
+          <div className="markdown-body">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex, rehypeHighlight]}
+            >
+              {markdown}
+            </ReactMarkdown>
+          </div>
+        </div>
       </main>
     </div>
   );
