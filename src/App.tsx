@@ -8,26 +8,42 @@ import {
   Columns,
   Edit3,
   BookOpen,
-  Trash2
+  Trash2,
+  GripVertical,
+  Library
 } from 'lucide-react';
 import { ReaderView } from './components/ReaderView';
+import { LocalDocLibrary } from './components/LocalDocLibrary';
 import { getDocumentStats } from './utils/markdownUtils';
 import './App.css';
 
+const SESSION_KEY = 'md-reader-content';
+
 function App() {
-  const [markdown, setMarkdown] = useState<string>('');
+  const [markdown, setMarkdown] = useState<string>(() => {
+    return sessionStorage.getItem(SESSION_KEY) ?? '';
+  });
   const [isInlineEditMode, setIsInlineEditMode] = useState<boolean>(false);
   const [isSplitMode, setIsSplitMode] = useState<boolean>(false);
+  const [splitPercent, setSplitPercent] = useState<number>(50);
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
     return localStorage.getItem('theme') === 'light';
   });
+  const [isLibraryOpen, setIsLibraryOpen] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef(markdown);
+  const contentAreaRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+
   useEffect(() => { markdownRef.current = markdown; }, [markdown]);
 
-  const stats = useMemo(() => getDocumentStats(markdown), [markdown]);
+  // Persist to sessionStorage on every change
+  useEffect(() => {
+    sessionStorage.setItem(SESSION_KEY, markdown);
+  }, [markdown]);
 
+  // ── Theme ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (isLightMode) {
       document.body.classList.add('light-theme');
@@ -38,6 +54,35 @@ function App() {
     }
   }, [isLightMode]);
 
+  // ── Split-view resizer ────────────────────────────────────────────────
+  const handleResizerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isDraggingRef.current || !contentAreaRef.current) return;
+      const rect = contentAreaRef.current.getBoundingClientRect();
+      const rawPercent = ((ev.clientX - rect.left) / rect.width) * 100;
+      setSplitPercent(Math.min(Math.max(rawPercent, 20), 80));
+    };
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, []);
+
+  const stats = useMemo(() => getDocumentStats(markdown), [markdown]);
+
+  // ── Download as .md ───────────────────────────────────────────────────
   const handleDownload = useCallback(() => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -50,38 +95,29 @@ function App() {
     URL.revokeObjectURL(url);
   }, [markdown]);
 
+  // ── Split mode toggle ─────────────────────────────────────────────────
   const handleToggleSplitMode = useCallback(() => {
     setIsSplitMode((prev) => {
       const next = !prev;
-      if (next) {
-        setIsInlineEditMode(false);
-      }
+      if (next) setIsInlineEditMode(false);
       return next;
     });
   }, []);
 
-  // Handle global paste and keyboard shortcuts
+  // ── Global paste & keyboard shortcuts ────────────────────────────────
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
-      // Don't intercept if they are actively typing in an input/textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const text = e.clipboardData?.getData('text');
       if (text) {
-        if (markdownRef.current.trim() && !window.confirm('Replace existing content with clipboard text?')) {
-          return;
-        }
+        if (markdownRef.current.trim() && !window.confirm('Replace existing content with clipboard text?')) return;
         setMarkdown(text);
         setIsInlineEditMode(false);
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't override if typing in an editor
       const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
         handleDownload();
@@ -104,15 +140,14 @@ function App() {
     };
   }, [handleDownload, isSplitMode]);
 
+  // ── File upload ───────────────────────────────────────────────────────
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     if (markdown.trim() && !window.confirm(`Replace existing content with "${file.name}"?`)) {
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result;
@@ -122,19 +157,15 @@ function App() {
       }
     };
     reader.readAsText(file);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // ── Paste from clipboard button ───────────────────────────────────────
   const handlePasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
-        if (markdown.trim() && !window.confirm('Replace existing content with clipboard text?')) {
-          return;
-        }
+        if (markdown.trim() && !window.confirm('Replace existing content with clipboard text?')) return;
         setMarkdown(text);
         setIsInlineEditMode(false);
       }
@@ -144,18 +175,29 @@ function App() {
     }
   };
 
+  // ── Clear content ─────────────────────────────────────────────────────
   const handleClearContent = () => {
     if (markdown && window.confirm('Clear all content?')) {
       setMarkdown('');
     }
   };
 
+  // ── Logo click → Read mode ────────────────────────────────────────────
+  const handleLogoClick = useCallback(() => {
+    setIsInlineEditMode(false);
+    setIsSplitMode(false);
+  }, []);
+
   return (
     <div className="app-container">
       {/* Top Navigation Toolbar */}
       <header className="toolbar glass-panel">
         <div className="toolbar-left">
-          <div className="logo">
+          <button
+            className="logo logo-btn"
+            onClick={handleLogoClick}
+            title="Back to Reader Mode"
+          >
             <img
               src={`${import.meta.env.BASE_URL}icon.png`}
               alt="MD Reader Logo"
@@ -164,7 +206,7 @@ function App() {
               style={{ borderRadius: '6px' }}
             />
             <span className="logo-text">MD Reader</span>
-          </div>
+          </button>
         </div>
 
         <div className="toolbar-right">
@@ -186,9 +228,19 @@ function App() {
             <span>Paste</span>
           </button>
 
-          <button className="btn" onClick={handleDownload} title="Save / Download File (Ctrl+S)">
+          <button className="btn" onClick={handleDownload} title="Download as .md file (Ctrl+S)">
             <Download size={16} />
             <span>Save</span>
+          </button>
+
+          {/* Local Document Library */}
+          <button
+            className={`btn ${isLibraryOpen ? 'active' : ''}`}
+            onClick={() => setIsLibraryOpen(true)}
+            title="Open local document library"
+          >
+            <Library size={16} />
+            <span>Library</span>
           </button>
 
           <div className="toolbar-separator" />
@@ -198,7 +250,7 @@ function App() {
             <button
               className={`btn ${isInlineEditMode ? 'active' : ''}`}
               onClick={() => setIsInlineEditMode(!isInlineEditMode)}
-              title={isInlineEditMode ? "Switch to Read Mode (Ctrl+E)" : "Switch to Inline Edit Mode (Ctrl+E)"}
+              title={isInlineEditMode ? 'Switch to Read Mode (Ctrl+E)' : 'Switch to Inline Edit Mode (Ctrl+E)'}
             >
               {isInlineEditMode ? (
                 <>
@@ -218,7 +270,7 @@ function App() {
           <button
             className={`btn ${isSplitMode ? 'active' : ''}`}
             onClick={handleToggleSplitMode}
-            title={isSplitMode ? "Close Split Raw Editor" : "Open Split Raw Editor"}
+            title={isSplitMode ? 'Close Split Raw Editor' : 'Open Split Raw Editor'}
           >
             <Columns size={16} />
             <span>Split View</span>
@@ -237,7 +289,7 @@ function App() {
           <button
             className="btn icon-only"
             onClick={() => setIsLightMode(!isLightMode)}
-            title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            title={isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
           >
             {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
           </button>
@@ -245,21 +297,35 @@ function App() {
       </header>
 
       {/* Main Workspace Area */}
-      <main className="content-area">
+      <main className="content-area" ref={contentAreaRef}>
         {isSplitMode && (
-          <div className="pane glass-panel raw-editor-pane animate-fade-in">
-            <div className="raw-editor-header">
-              <span>Raw Markdown Source</span>
-              <span className="raw-stats">{stats.lines} lines</span>
+          <>
+            <div
+              className="pane glass-panel raw-editor-pane animate-fade-in"
+              style={{ width: `${splitPercent}%`, flex: 'none' }}
+            >
+              <div className="raw-editor-header">
+                <span>Raw Markdown Source</span>
+                <span className="raw-stats">{stats.lines} lines</span>
+              </div>
+              <textarea
+                className="editor"
+                value={markdown}
+                onChange={(e) => setMarkdown(e.target.value)}
+                placeholder="Type or paste your Markdown here..."
+                autoFocus
+              />
             </div>
-            <textarea
-              className="editor"
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              placeholder="Type or paste your Markdown here..."
-              autoFocus
-            />
-          </div>
+
+            {/* Drag resizer */}
+            <div
+              className="split-resizer"
+              onMouseDown={handleResizerMouseDown}
+              title="Drag to resize"
+            >
+              <GripVertical size={14} />
+            </div>
+          </>
         )}
 
         <div className={`pane glass-panel preview-pane ${isSplitMode ? 'split-active' : ''}`}>
@@ -302,6 +368,18 @@ function App() {
           )}
         </div>
       </footer>
+
+      {/* Local Document Library Panel */}
+      {isLibraryOpen && (
+        <LocalDocLibrary
+          currentContent={markdown}
+          onOpen={(content) => {
+            setMarkdown(content);
+            setIsInlineEditMode(false);
+          }}
+          onClose={() => setIsLibraryOpen(false)}
+        />
+      )}
     </div>
   );
 }
