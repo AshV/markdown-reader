@@ -1,49 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeHighlight from 'rehype-highlight';
-import { BookOpen, FileEdit, FileUp, Download, Sun, Moon, ClipboardPaste } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo, useCallback, type ChangeEvent } from 'react';
+import {
+  FileUp,
+  Download,
+  Sun,
+  Moon,
+  ClipboardPaste,
+  Columns,
+  Edit3,
+  BookOpen,
+  Trash2
+} from 'lucide-react';
+import { ReaderView } from './components/ReaderView';
+import { getDocumentStats } from './utils/markdownUtils';
 import './App.css';
 
-const DEFAULT_MARKDOWN = `# Hit Ctrl+V now 📋
-
-_to Enjoy your distraction-free reading experience!_
-
-### Optionally you can use the buttons in the top-right corner to
-
->**Open a file**: 
-
-Click the **Open** button in the top right to select a local \`.md\` or \`.txt\` file from your computer.
-
->Or **Paste from clipboard** 📋
-
-If haven't pressed Ctrl+V already. Click the **Paste** button to instantly view it here.
-
->You can **Edit directly** here ✍️
-
-By switching to **Edit** mode using the toggle in the top right of this page.
-
->Maybe **Be a Batman** 🦇
-
-By Clicking on **Moon** 🌙 in top right corner.
-
->Or prove that **You're not Drakula** 🧛
-
-By Clicking on **Sun** 🌞 at exactly same place.
-
->Irrespective of that **Save your world(work)** 💾 eventually.
-
-Built with ❤️ by [AshV](https://www.ashishvishwakarma.com/)`;
-
 function App() {
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [markdown, setMarkdown] = useState<string>('');
+  const [isInlineEditMode, setIsInlineEditMode] = useState<boolean>(false);
+  const [isSplitMode, setIsSplitMode] = useState<boolean>(false);
   const [isLightMode, setIsLightMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') !== 'dark';
+    return localStorage.getItem('theme') === 'light';
   });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const markdownRef = useRef(markdown);
+  useEffect(() => { markdownRef.current = markdown; }, [markdown]);
+
+  const stats = useMemo(() => getDocumentStats(markdown), [markdown]);
 
   useEffect(() => {
     if (isLightMode) {
@@ -55,46 +38,7 @@ function App() {
     }
   }, [isLightMode]);
 
-  // Handle global paste to update markdown
-  useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
-      // Don't intercept if they are actively typing in an input/textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      const text = e.clipboardData?.getData('text');
-      if (text) {
-        setMarkdown(text);
-        setIsEditing(false); // Switch to reader mode on paste
-      }
-    };
-
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
-  }, []);
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result;
-      if (typeof content === 'string') {
-        setMarkdown(content);
-        setIsEditing(false); // Switch to view mode after opening
-      }
-    };
-    reader.readAsText(file);
-
-    // Reset input so the same file can be loaded again if needed
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -104,14 +48,95 @@ function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }, [markdown]);
+
+  const handleToggleSplitMode = useCallback(() => {
+    setIsSplitMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setIsInlineEditMode(false);
+      }
+      return next;
+    });
+  }, []);
+
+  // Handle global paste and keyboard shortcuts
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      // Don't intercept if they are actively typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      const text = e.clipboardData?.getData('text');
+      if (text) {
+        if (markdownRef.current.trim() && !window.confirm('Replace existing content with clipboard text?')) {
+          return;
+        }
+        setMarkdown(text);
+        setIsInlineEditMode(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't override if typing in an editor
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleDownload();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        fileInputRef.current?.click();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e' && !e.shiftKey) {
+        if (!isInput && !isSplitMode) {
+          e.preventDefault();
+          setIsInlineEditMode((prev) => !prev);
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleDownload, isSplitMode]);
+
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (markdown.trim() && !window.confirm(`Replace existing content with "${file.name}"?`)) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      if (typeof content === 'string') {
+        setMarkdown(content);
+        setIsInlineEditMode(false);
+      }
+    };
+    reader.readAsText(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handlePasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
+        if (markdown.trim() && !window.confirm('Replace existing content with clipboard text?')) {
+          return;
+        }
         setMarkdown(text);
-        setIsEditing(false); // Switch to reader mode on paste
+        setIsInlineEditMode(false);
       }
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
@@ -119,13 +144,26 @@ function App() {
     }
   };
 
+  const handleClearContent = () => {
+    if (markdown && window.confirm('Clear all content?')) {
+      setMarkdown('');
+    }
+  };
+
   return (
     <div className="app-container">
+      {/* Top Navigation Toolbar */}
       <header className="toolbar glass-panel">
         <div className="toolbar-left">
-          <div className="logo" style={{ marginRight: '1rem' }}>
-            <img src={`${import.meta.env.BASE_URL}icon.png`} alt="MD Reader Logo" width="24" height="24" style={{ borderRadius: '4px' }} />
-            <span>MD Reader</span>
+          <div className="logo">
+            <img
+              src={`${import.meta.env.BASE_URL}icon.png`}
+              alt="MD Reader Logo"
+              width="26"
+              height="26"
+              style={{ borderRadius: '6px' }}
+            />
+            <span className="logo-text">MD Reader</span>
           </div>
         </div>
 
@@ -137,55 +175,83 @@ function App() {
             onChange={handleFileUpload}
             className="file-input"
           />
-          <button className="btn" onClick={() => fileInputRef.current?.click()} title="Open File">
-            <FileUp size={18} />
+
+          <button className="btn" onClick={() => fileInputRef.current?.click()} title="Open File (Ctrl+O)">
+            <FileUp size={16} />
             <span>Open</span>
           </button>
 
-          <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard">
-            <ClipboardPaste size={18} />
+          <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard (Ctrl+V)">
+            <ClipboardPaste size={16} />
             <span>Paste</span>
           </button>
 
-          <button className="btn" onClick={handleDownload} title="Save File">
-            <Download size={18} />
+          <button className="btn" onClick={handleDownload} title="Save / Download File (Ctrl+S)">
+            <Download size={16} />
             <span>Save</span>
           </button>
 
-          <div style={{ width: '1px', height: '24px', background: 'var(--panel-border)', margin: '0 8px' }}></div>
+          <div className="toolbar-separator" />
+
+          {/* Inline Edit Mode Toggle - Hidden while in Split View */}
+          {!isSplitMode && (
+            <button
+              className={`btn ${isInlineEditMode ? 'active' : ''}`}
+              onClick={() => setIsInlineEditMode(!isInlineEditMode)}
+              title={isInlineEditMode ? "Switch to Read Mode (Ctrl+E)" : "Switch to Inline Edit Mode (Ctrl+E)"}
+            >
+              {isInlineEditMode ? (
+                <>
+                  <BookOpen size={16} />
+                  <span>Read</span>
+                </>
+              ) : (
+                <>
+                  <Edit3 size={16} />
+                  <span>Inline Edit</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Split Raw Editor Toggle */}
+          <button
+            className={`btn ${isSplitMode ? 'active' : ''}`}
+            onClick={handleToggleSplitMode}
+            title={isSplitMode ? "Close Split Raw Editor" : "Open Split Raw Editor"}
+          >
+            <Columns size={16} />
+            <span>Split View</span>
+          </button>
+
+          <div className="toolbar-separator" />
 
           <button
-            className="btn active"
-            onClick={() => setIsEditing(!isEditing)}
-            title={isEditing ? "Switch to Read Mode" : "Switch to Edit Mode"}
+            className="btn icon-only"
+            onClick={handleClearContent}
+            title="Clear Content"
           >
-            {isEditing ? (
-              <>
-                <BookOpen size={18} />
-                <span>Read</span>
-              </>
-            ) : (
-              <>
-                <FileEdit size={18} />
-                <span>Edit</span>
-              </>
-            )}
+            <Trash2 size={16} />
           </button>
 
           <button
-            className="btn"
+            className="btn icon-only"
             onClick={() => setIsLightMode(!isLightMode)}
             title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            style={{ padding: '0.5rem', borderRadius: '50%' }}
           >
-            {isLightMode ? <Moon size={18} /> : <Sun size={18} />}
+            {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
           </button>
         </div>
       </header>
 
+      {/* Main Workspace Area */}
       <main className="content-area">
-        {isEditing && (
-          <div className="pane glass-panel">
+        {isSplitMode && (
+          <div className="pane glass-panel raw-editor-pane animate-fade-in">
+            <div className="raw-editor-header">
+              <span>Raw Markdown Source</span>
+              <span className="raw-stats">{stats.lines} lines</span>
+            </div>
             <textarea
               className="editor"
               value={markdown}
@@ -195,17 +261,47 @@ function App() {
             />
           </div>
         )}
-        <div className={`pane glass-panel preview-container ${isEditing ? 'hide-on-mobile' : ''}`}>
-          <div className="markdown-body">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[rehypeKatex, rehypeHighlight]}
-            >
-              {markdown}
-            </ReactMarkdown>
-          </div>
+
+        <div className={`pane glass-panel preview-pane ${isSplitMode ? 'split-active' : ''}`}>
+          <ReaderView
+            markdown={markdown}
+            onChangeMarkdown={setMarkdown}
+            isInlineEditMode={isSplitMode ? false : isInlineEditMode}
+            onToggleInlineEditMode={() => setIsInlineEditMode(!isInlineEditMode)}
+          />
         </div>
       </main>
+
+      {/* Bottom Status & Statistics Bar */}
+      <footer className="statusbar glass-panel">
+        <div className="statusbar-left">
+          <span className="status-item">
+            <strong>{stats.words}</strong> words
+          </span>
+          <span className="status-item">
+            <strong>{stats.chars}</strong> chars
+          </span>
+          <span className="status-item">
+            <strong>~{stats.readingTimeMinutes} min</strong> read
+          </span>
+        </div>
+
+        <div className="statusbar-right">
+          {isSplitMode ? (
+            <span className="status-hint">
+              💻 <strong>Split View:</strong> Edit raw markdown on the left, live preview on the right
+            </span>
+          ) : isInlineEditMode ? (
+            <span className="status-hint">
+              ✏️ <strong>Inline Edit Active:</strong> Hover over any block to edit, or select text to format
+            </span>
+          ) : (
+            <span className="status-hint">
+              📖 <strong>Reader Mode:</strong> Click <strong>Inline Edit</strong> in toolbar or press <strong>Ctrl+E</strong> to edit
+            </span>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }
