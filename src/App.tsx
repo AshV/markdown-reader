@@ -191,12 +191,14 @@ function App() {
   return (
     <div className="app-container">
       {/* Top Navigation Toolbar */}
-      <header className="toolbar glass-panel">
+      <header className="toolbar glass-panel" role="banner">
+        <h1 className="sr-only">Markdown Reader – Free Online Markdown Editor & Viewer</h1>
         <div className="toolbar-left">
           <button
             className="logo logo-btn"
             onClick={handleLogoClick}
             title="Back to Reader Mode"
+            aria-label="Back to Reader Mode"
           >
             <img
               src={`${import.meta.env.BASE_URL}icon.png`}
@@ -209,26 +211,27 @@ function App() {
           </button>
         </div>
 
-        <div className="toolbar-right">
+        <div className="toolbar-right" role="toolbar" aria-label="Editor controls">
           <input
             type="file"
             accept=".md,.txt,text/markdown,text/plain"
             ref={fileInputRef}
             onChange={handleFileUpload}
             className="file-input"
+            aria-label="Upload Markdown file"
           />
 
-          <button className="btn" onClick={() => fileInputRef.current?.click()} title="Open File (Ctrl+O)">
+          <button className="btn" onClick={() => fileInputRef.current?.click()} title="Open File (Ctrl+O)" aria-label="Open Markdown file">
             <FileUp size={16} />
             <span>Open</span>
           </button>
 
-          <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard (Ctrl+V)">
+          <button className="btn" onClick={handlePasteFromClipboard} title="Paste from Clipboard (Ctrl+V)" aria-label="Paste markdown from clipboard">
             <ClipboardPaste size={16} />
             <span>Paste</span>
           </button>
 
-          <button className="btn" onClick={handleDownload} title="Download as .md file (Ctrl+S)">
+          <button className="btn" onClick={handleDownload} title="Download as .md file (Ctrl+S)" aria-label="Download as Markdown file">
             <Download size={16} />
             <span>Save</span>
           </button>
@@ -238,6 +241,7 @@ function App() {
             className={`btn ${isLibraryOpen ? 'active' : ''}`}
             onClick={() => setIsLibraryOpen(true)}
             title="Open local document library"
+            aria-label="Open local document library"
           >
             <Library size={16} />
             <span>Library</span>
@@ -251,6 +255,7 @@ function App() {
               className={`btn ${isInlineEditMode ? 'active' : ''}`}
               onClick={() => setIsInlineEditMode(!isInlineEditMode)}
               title={isInlineEditMode ? 'Switch to Read Mode (Ctrl+E)' : 'Switch to Inline Edit Mode (Ctrl+E)'}
+              aria-label={isInlineEditMode ? 'Switch to Read Mode' : 'Switch to Inline Edit Mode'}
             >
               {isInlineEditMode ? (
                 <>
@@ -271,6 +276,7 @@ function App() {
             className={`btn ${isSplitMode ? 'active' : ''}`}
             onClick={handleToggleSplitMode}
             title={isSplitMode ? 'Close Split Raw Editor' : 'Open Split Raw Editor'}
+            aria-label={isSplitMode ? 'Close Split Raw Editor' : 'Open Split Raw Editor'}
           >
             <Columns size={16} />
             <span>Split View</span>
@@ -282,6 +288,7 @@ function App() {
             className="btn icon-only"
             onClick={handleClearContent}
             title="Clear Content"
+            aria-label="Clear all content"
           >
             <Trash2 size={16} />
           </button>
@@ -290,6 +297,7 @@ function App() {
             className="btn icon-only"
             onClick={() => setIsLightMode(!isLightMode)}
             title={isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            aria-label={isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
           >
             {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
           </button>
@@ -297,7 +305,7 @@ function App() {
       </header>
 
       {/* Main Workspace Area */}
-      <main className="content-area" ref={contentAreaRef}>
+      <main className="content-area" ref={contentAreaRef} role="main">
         {isSplitMode && (
           <>
             <div
@@ -339,7 +347,7 @@ function App() {
       </main>
 
       {/* Bottom Status & Statistics Bar */}
-      <footer className="statusbar glass-panel">
+      <footer className="statusbar glass-panel" role="contentinfo">
         <div className="statusbar-left">
           <span className="status-item">
             <strong>{stats.words}</strong> words

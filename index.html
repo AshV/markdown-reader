@@ -2,14 +2,192 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
-    <link rel="apple-touch-icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Reader – Free Online Markdown Editor, Live Preview & LaTeX/Mermaid Renderer</title>
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Markdown Reader – Free Online Markdown Editor, Live Preview & LaTeX/Mermaid Renderer" />
+    <meta name="description" content="Fast, private online Markdown editor & reader. Features live split-view preview, LaTeX math (KaTeX), Mermaid diagrams, syntax highlighting, offline PWA, and local document storage." />
+    <meta name="keywords" content="markdown reader, markdown editor, online markdown viewer, github flavored markdown, gfm viewer, latex math editor, katex markdown, mermaid diagram renderer, markdown split preview, offline markdown editor, pwa markdown reader, private markdown editor" />
+    <meta name="author" content="Ashish Vishwakarma" />
+    <meta name="publisher" content="Ashish Vishwakarma" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="application-name" content="Markdown Reader" />
+    <meta name="rating" content="General" />
+    <meta name="revisit-after" content="7 days" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.ashishvishwakarma.com/markdown-reader/" />
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#6366f1" />
+
+    <!-- Theme & Mobile App Settings -->
     <meta name="theme-color" content="#0f111a" />
-    <title>Markdown Reader</title>
+    <meta name="color-scheme" content="dark light" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Markdown Reader" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Discord -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Markdown Reader" />
+    <meta property="og:url" content="https://www.ashishvishwakarma.com/markdown-reader/" />
+    <meta property="og:title" content="Markdown Reader – Free Online Markdown Editor & Live Viewer" />
+    <meta property="og:description" content="Fast, private online Markdown editor with live split-screen preview, LaTeX math formulas, Mermaid diagrams, and offline PWA support." />
+    <meta property="og:image" content="https://www.ashishvishwakarma.com/markdown-reader/og-image.png" />
+    <meta property="og:image:secure_url" content="https://www.ashishvishwakarma.com/markdown-reader/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Markdown Reader - Fast, Private Online Markdown Editor & Viewer" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.ashishvishwakarma.com/markdown-reader/" />
+    <meta name="twitter:title" content="Markdown Reader – Free Online Markdown Editor & Live Viewer" />
+    <meta name="twitter:description" content="Fast, private online Markdown editor with live split-screen preview, LaTeX math formulas, Mermaid diagrams, and offline PWA support." />
+    <meta name="twitter:image" content="https://www.ashishvishwakarma.com/markdown-reader/og-image.png" />
+    <meta name="twitter:image:alt" content="Markdown Reader - Fast, Private Online Markdown Editor & Viewer" />
+
+    <!-- Schema.org JSON-LD Structured Data: WebApplication, FAQPage, WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://www.ashishvishwakarma.com/markdown-reader/#webapp",
+          "name": "Markdown Reader",
+          "url": "https://www.ashishvishwakarma.com/markdown-reader/",
+          "description": "Fast, private online Markdown reader and editor with live preview, LaTeX math equation support, Mermaid diagrams, code syntax highlighting, and offline PWA capability.",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "All (Web, Windows, macOS, Linux, iOS, Android)",
+          "browserRequirements": "Requires modern web browser with JavaScript enabled",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Ashish Vishwakarma",
+            "url": "https://www.ashishvishwakarma.com"
+          },
+          "featureList": [
+            "GitHub Flavored Markdown (GFM) rendering",
+            "LaTeX mathematical equation rendering with KaTeX",
+            "Mermaid flowcharts, sequence diagrams, and class diagrams",
+            "Syntax highlighting for 100+ programming languages",
+            "Split-view real-time dual editor and live preview",
+            "Inline block-level markdown editing",
+            "Local document library with browser storage",
+            "Installable Progressive Web App (PWA) with full offline support",
+            "Word count, character count, and reading time metrics",
+            "Zero tracking — 100% private client-side processing"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.ashishvishwakarma.com/markdown-reader/#website",
+          "name": "Markdown Reader",
+          "url": "https://www.ashishvishwakarma.com/markdown-reader/",
+          "description": "Free online Markdown editor, live preview viewer, LaTeX math renderer, and Mermaid diagram generator.",
+          "publisher": {
+            "@type": "Person",
+            "name": "Ashish Vishwakarma",
+            "url": "https://www.ashishvishwakarma.com"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://www.ashishvishwakarma.com/markdown-reader/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Markdown Reader?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Markdown Reader is a free, modern web application designed for viewing, editing, and previewing Markdown documents in real-time. It supports GitHub Flavored Markdown (GFM), LaTeX equations, Mermaid diagrams, code syntax highlighting, and works completely offline."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Markdown Reader support LaTeX math formulas?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Markdown Reader includes built-in KaTeX math rendering. You can write inline equations using $...$ and display math blocks using $$...$$ with instant rendering."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I render Mermaid diagrams and flowcharts in Markdown Reader?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, Markdown Reader natively renders Mermaid diagrams. Simply create a code block with ```mermaid and write your flowchart, sequence diagram, Gantt chart, or class diagram."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Markdown Reader private and secure?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, 100%. All processing and rendering happens directly in your browser. Your documents and notes are never uploaded to any remote server or third-party cloud."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use Markdown Reader offline?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Markdown Reader is a Progressive Web App (PWA). You can install it to your home screen or desktop and use it anywhere without an active internet connection."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Accessibility and Search Engine Crawlable Content (Pre-rendered for web crawlers and JS-disabled users) -->
+    <noscript>
+      <div style="font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #1e293b;">
+        <h1>Markdown Reader – Free Online Markdown Editor & Viewer</h1>
+        <p>A fast, private, and powerful online Markdown editor and viewer. Render GitHub Flavored Markdown (GFM), LaTeX equations, Mermaid diagrams, tables, and code snippets with live split-screen preview.</p>
+        
+        <h2>Key Features:</h2>
+        <ul>
+          <li><strong>GitHub Flavored Markdown (GFM):</strong> Tables, task lists, strikethrough, autolinks.</li>
+          <li><strong>LaTeX / KaTeX Math:</strong> Beautiful mathematical equations and formulas.</li>
+          <li><strong>Mermaid Diagrams:</strong> Flowcharts, sequence diagrams, class diagrams, state machines.</li>
+          <li><strong>Syntax Highlighting:</strong> High-performance code highlighting for 100+ languages.</li>
+          <li><strong>Split-Screen Live Preview:</strong> Side-by-side editing and real-time rendering.</li>
+          <li><strong>Inline Block Editing:</strong> Direct in-place editing of individual markdown blocks.</li>
+          <li><strong>100% Private & Offline:</strong> Installable PWA with local browser document library.</li>
+        </ul>
+
+        <h2>Frequently Asked Questions</h2>
+        <h3>How do I open or edit a Markdown file?</h3>
+        <p>Enable JavaScript to use the interactive reader, open local .md files, paste markdown from your clipboard, or edit directly in split-screen mode.</p>
+      </div>
+    </noscript>
+
+    <div id="root">
+      <!-- Semantic initial content for crawlers before React hydration -->
+      <div class="sr-only" aria-hidden="false">
+        <h1>Markdown Reader – Free Online Markdown Editor, Viewer & LaTeX/Diagram Renderer</h1>
+        <p>Fast, private, client-side Markdown reader and editor with live split preview, LaTeX KaTeX formulas, Mermaid diagrams, code syntax highlighting, and offline PWA storage.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -9,22 +9,39 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Markdown Reader',
+        name: 'Markdown Reader – Free Online Markdown Editor & Viewer',
         short_name: 'MD Reader',
-        description: 'A clean and simple Markdown Reader',
+        description: 'Fast, private online Markdown editor and viewer with live preview, LaTeX math, Mermaid diagrams, and offline support.',
         theme_color: '#0f111a',
         background_color: '#0f111a',
         display: 'standalone',
+        orientation: 'any',
+        lang: 'en',
+        dir: 'ltr',
+        start_url: './',
+        scope: './',
+        categories: ['productivity', 'utilities', 'developer'],
         icons: [
           {
             src: 'icon.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'icon.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'New Markdown Document',
+            short_name: 'New Doc',
+            description: 'Start writing or editing a markdown document',
+            url: './',
+            icons: [{ src: 'icon.png', sizes: '192x192' }]
           }
         ]
       }
